@@ -3,3 +3,5 @@ chr1/data/chr1.filtered.maf
 chr1/data/chr1.filtered.mafindex
 chr1/data/chr1.filtered.region.maf
 chr1/data/chr1.maf.gz
+simulated_posterior/data/post_tab.csv
+simulated_posterior/data/post_tab_cutpoints.csv
