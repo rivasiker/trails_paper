@@ -1,0 +1,97 @@
+// Keywords: migration, dispersal
+
+
+initialize() {
+	if (exists("slimgui"))
+ 	{  
+ 		defineConstant("name", "../results/sim_45ILS_0.5sel_deep"); 
+ 		defineConstant("seed", 100); 
+ 		defineConstant("mu", 6e-6);
+ 		defineConstant("rho", 2e-6);
+		defineConstant("burnin", 10000);
+		defineConstant("t_AB_C", burnin+2500);
+		defineConstant("t_A_B", t_AB_C+147);
+		defineConstant("t_sample", t_A_B+500);
+		defineConstant("N_ABCD", 175);
+		defineConstant("N_ABC", 175);
+		defineConstant("N_AB", 200);
+		defineConstant("N_A", 200);
+		defineConstant("N_B", 200);
+		defineConstant("N_C", 200);
+		defineConstant("N_D", 200);
+	}
+	setSeed(seed);
+	initializeTreeSeq();
+	initializeMutationRate(mu);
+	initializeRecombinationRate(rho);
+	initializeMutationType("m1", 0.5, "f", 0.0);
+	initializeMutationType("m2", 1.0, "f", 1);
+	initializeGenomicElementType("g1", m1, 1.0);
+	initializeGenomicElement(g1, 0, 199999);
+}
+1 early() { 
+	// save this run's identifier, used to save and restore
+	defineConstant("simID", getSeed());
+	cat("Initial seed: " + getSeed() + "\n");
+	sim.addSubpop("p1234", N_ABCD); 
+}
+s123 100000000 early() { 
+	sim.addSubpopSplit("p123", N_ABC, p1234); 
+	sim.addSubpopSplit("p4", N_D, p1234); 
+	p1234.setSubpopulationSize(0);
+}
+s12 100000000 early() { 
+	sim.addSubpopSplit("p12", N_AB, p123); 
+	sim.addSubpopSplit("p3", N_C, p123); 
+	p123.setSubpopulationSize(0);
+}
+s1 100000000 early() { 
+	sim.addSubpopSplit("p1", N_A, p12); 
+	sim.addSubpopSplit("p2", N_B, p12); 
+	p12.setSubpopulationSize(0);
+}
+s9 100000000 early() { 
+	p1.setSubpopulationSize(1);
+	p2.setSubpopulationSize(1);
+	p3.setSubpopulationSize(1);
+	p4.setSubpopulationSize(1);
+}
+s0 100000000 late() { 
+	p1.outputSample(1, filePath = name+'_1.log');
+	p2.outputSample(1, filePath = name+'_2.log');
+	p3.outputSample(1, filePath = name+'_3.log');
+	p4.outputSample(1, filePath = name+'_4.log');
+	sim.treeSeqOutput(name+".trees");
+	sim.simulationFinished();
+}
+s8 100000000 late() {
+	// save the state of the simulation
+	sim.outputFull(tempdir() + "slim_" + simID + ".txt");
+	sim.treeSeqOutput(tempdir() + "slim_" + simID + ".trees");
+	target = sample(p123.genomes, 1);
+	target.addNewDrawnMutation(m2, 100000);
+}
+s7 100000000 late() {
+	// If the mutation is lost
+	if (sim.countOfMutationsOfType(m2) == 0)
+	{
+		// Restart the simulation with a new seed
+		cat("LOST – RESTARTING\n");	
+		sim.readFromPopulationFile(tempdir() + "slim_" + simID + ".txt");
+		sim.readFromPopulationFile(tempdir() + "slim_" + simID + ".trees");
+		setSeed(rdunif(1, 0, asInteger(2^62) - 1));
+		cat("New seed: " + getSeed() + "\n");
+		target = sample(p123.genomes, 1);
+		target.addNewDrawnMutation(m2, 100000);
+	}
+}
+1 early() {
+	community.rescheduleScriptBlock(s123, start=burnin, end=burnin);
+	community.rescheduleScriptBlock(s12, start=t_AB_C, end=t_AB_C);
+	community.rescheduleScriptBlock(s1, start=t_A_B, end=t_A_B);
+	community.rescheduleScriptBlock(s8, start=burnin+8000-278, end=burnin+8000-278);
+	community.rescheduleScriptBlock(s7, start=burnin+8000-278, end=burnin+8000);
+	community.rescheduleScriptBlock(s9, start=t_sample, end=t_sample);
+	community.rescheduleScriptBlock(s0, start=t_sample, end=t_sample);
+}
+
