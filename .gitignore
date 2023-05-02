@@ -8,3 +8,9 @@ simulated_posterior/data/post_tab_cutpoints.csv
 selection_posterior/results/post_tab.csv
 selection_posterior/results/hid_tab.csv
 selection_posterior/results/tree_tab.csv
+selection_posterior/results/hid_tab_first.csv
+selection_posterior/results/hid_tab_second.csv
+selection_posterior/results/post_tab_first.csv
+selection_posterior/results/post_tab_second.csv
+selection_posterior/results/tree_tab_first.csv
+selection_posterior/results/tree_tab_second.csv

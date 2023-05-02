@@ -5,13 +5,14 @@ initialize() {
 	if (exists("slimgui"))
  	{  
  		defineConstant("name", "../results/sim_45ILS_0.5sel_deep"); 
- 		defineConstant("seed", 100); 
- 		defineConstant("mu", 6e-6);
- 		defineConstant("rho", 2e-6);
+ 		
+ 		defineConstant("seed", 10); 
+ 		defineConstant("mu", 3e-6);
+ 		defineConstant("rho", 1e-6);
 		defineConstant("burnin", 10000);
-		defineConstant("t_AB_C", burnin+2500);
-		defineConstant("t_A_B", t_AB_C+147);
-		defineConstant("t_sample", t_A_B+500);
+		defineConstant("t_AB_C", burnin+5000);
+		defineConstant("t_A_B", t_AB_C+294);
+		defineConstant("t_sample", t_A_B+1000);
 		defineConstant("N_ABCD", 175);
 		defineConstant("N_ABC", 175);
 		defineConstant("N_AB", 200);
@@ -19,6 +20,21 @@ initialize() {
 		defineConstant("N_B", 200);
 		defineConstant("N_C", 200);
 		defineConstant("N_D", 200);
+		
+//		defineConstant("seed", 10); 
+// 		defineConstant("mu", 4e-6);
+// 		defineConstant("rho", 1e-6);
+//		defineConstant("burnin", 12000);
+//		defineConstant("t_AB_C", burnin+8000);
+//		defineConstant("t_A_B", t_AB_C+200);
+//		defineConstant("t_sample", t_A_B+1900);
+//		defineConstant("N_ABCD", 250);
+//		defineConstant("N_ABC", 250);
+//		defineConstant("N_AB", 250);
+//		defineConstant("N_A", 250);
+//		defineConstant("N_B", 250);
+//		defineConstant("N_C", 250);
+//		defineConstant("N_D", 250);
 	}
 	setSeed(seed);
 	initializeTreeSeq();
@@ -89,9 +105,10 @@ s7 100000000 late() {
 	community.rescheduleScriptBlock(s123, start=burnin, end=burnin);
 	community.rescheduleScriptBlock(s12, start=t_AB_C, end=t_AB_C);
 	community.rescheduleScriptBlock(s1, start=t_A_B, end=t_A_B);
-	community.rescheduleScriptBlock(s8, start=burnin+8000-278, end=burnin+8000-278);
-	community.rescheduleScriptBlock(s7, start=burnin+8000-278, end=burnin+8000);
+	community.rescheduleScriptBlock(s8, start=t_AB_C-80, end=t_AB_C-80);
+	community.rescheduleScriptBlock(s7, start=t_AB_C-80, end=t_AB_C);
+//	community.rescheduleScriptBlock(s8, start=burnin+8000-278, end=burnin+8000-278);
+//	community.rescheduleScriptBlock(s7, start=burnin+8000-278, end=burnin+8000);
 	community.rescheduleScriptBlock(s9, start=t_sample, end=t_sample);
 	community.rescheduleScriptBlock(s0, start=t_sample, end=t_sample);
 }
-
