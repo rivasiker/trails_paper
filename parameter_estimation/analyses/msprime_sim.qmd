@@ -1,0 +1,222 @@
+---
+title: "msprime simulations"
+format: html
+editor: visual
+---
+
+```{r}
+
+library(tidyverse)
+library(glue)
+library(ggthemes)
+library(latex2exp)
+
+```
+
+```{r}
+
+nsim <- 5
+
+# model <- 'fixed'
+# 
+# tab <- tibble()
+# for (n_AB in c(1, 3, 5)) {
+#   print(n_AB)
+#   for (n_ABC in c(1, 3, 5)) {
+#     for (sim in 1:nsim) {
+#       if (file.exists(glue('../results/sim_{n_AB}_{n_ABC}_{sim}_{model}_model.csv'))) {
+#         tab <- bind_rows(tab, read_csv(
+#           glue('../results/sim_{n_AB}_{n_ABC}_{sim}_{model}_model.csv'), 
+#           col_names = c('idx', 't_1', 't_2', 't_upper', 'N_AB', 'N_ABC', 
+#                         'rho', 
+#                         'loglik', 'time'),
+#           show_col_types = FALSE) %>% 
+#           mutate(n_AB = n_AB, n_ABC = n_ABC, sim = sim) |> 
+#           mutate(
+#             # t_3 = t_upper+qexp(1-1/n_ABC)*N_ABC
+#           )
+#         )
+#       }
+#       
+#     }
+#   }
+# }
+# 
+# true <- tab %>% 
+#   filter(idx == -1, sim == 1) %>% 
+#   select(-idx, -loglik, -time, -sim) %>% 
+#   group_by(n_AB, n_ABC) %>% 
+#   pivot_longer(-c(n_AB, n_ABC)) 
+
+model <- 'error'
+mu <- 1.5e-8
+
+tab2 <- tibble()
+for (n_AB in c(1, 3, 5)) {
+  print(n_AB)
+  for (n_ABC in c(1, 3, 5)) {
+    for (sim in 1:nsim) {
+      if (file.exists(glue('../results/sim_{n_AB}_{n_ABC}_{sim}_{model}_model.csv'))) {
+        tab2 <- bind_rows(tab2, read_csv(
+          glue('../results/sim_{n_AB}_{n_ABC}_{sim}_{model}_model.csv'), 
+          col_names = c('idx', 't_A', 't_B', 't_C', 't_2', 't_upper', 'N_AB', 'N_ABC', 'rho', 
+                        'loglik', 'time'),
+          show_col_types = FALSE) %>% 
+          mutate(n_AB = n_AB, n_ABC = n_ABC, sim = sim) |> 
+          mutate(
+            # t_3 = t_upper+qexp(1-1/n_ABC)*N_ABC
+          ) %>%
+            # mutate_at(vars(starts_with("t_")), ~.x/mu) |> 
+            # mutate_at(vars(c('N_AB', 'N_ABC')), ~.x/mu) |> 
+            # mutate(rho = rho*mu) |> 
+            {.}
+        )
+      }
+    }
+  }
+}
+
+
+```
+
+```{r}
+
+tab2 |> 
+  filter(idx == -1) |> 
+  group_by(n_AB, n_ABC, sim) |> 
+  filter(loglik == max(loglik)) |> 
+  ungroup() |> 
+  select(-c(idx, loglik, time, sim)) |> 
+  pivot_longer(-c(n_AB, n_ABC)) |> 
+  group_by(n_AB, n_ABC, name) |> 
+  summarise(
+    mean = mean(value),
+    median = median(value)
+  ) |> 
+  mutate(
+    ILS_mean = (2/3)*exp(-(mean[name == 't_2'])/(mean[name == 'N_AB'])),
+    ILS_median = (2/3)*exp(-(median[name == 't_2'])/(median[name == 'N_AB']))
+  )
+
+tab2 |> 
+  filter(idx != -1) |> 
+  group_by(n_AB, n_ABC, sim) |> 
+  filter(loglik == max(loglik)) |> 
+  ungroup() |> 
+  select(-c(idx, loglik, time, sim)) |> 
+  pivot_longer(-c(n_AB, n_ABC)) |> 
+  group_by(n_AB, n_ABC, name) |> 
+  summarise(
+    mean = mean(value),
+    median = median(value)
+  ) |> 
+  mutate(
+    ILS_mean = (2/3)*exp(-(mean[name == 't_2'])/(mean[name == 'N_AB'])),
+    ILS_median = (2/3)*exp(-(median[name == 't_2'])/(median[name == 'N_AB']))
+  )
+
+```
+
+```{r fig.height=8, fig.width=7}
+
+
+# tab2 %>% 
+#   filter(idx != -1) %>% 
+#   # filter(idx < 300) %>% 
+#   group_by(n_AB, n_ABC, sim) %>% 
+#   filter(loglik == max(loglik)) %>% 
+#   ungroup() %>% 
+#   select(-idx, -loglik, -time) %>% 
+#   group_by(n_ABC) %>% 
+#   pivot_longer(-c(sim, n_AB, n_ABC)) %>% 
+#   ggplot() +
+#   geom_boxplot(aes(n_AB, value, color = as.character(n_AB))) +
+#   # geom_text(aes(n_ABC, value, label = sim), color = 'blue', size = 5) +
+#   geom_hline(aes(yintercept = value), color = 'red', data = true) +
+#   facet_grid(name~n_ABC, scales = 'free_y') + 
+#   theme_bw()  +
+#   expand_limits(y=0) +
+#   NULL
+
+t_size <- 15
+
+true2 <- tab2 %>% 
+  filter(idx == -1, sim == 1) %>% 
+  select(-idx, -loglik, -time, -sim) %>% 
+  group_by(n_AB, n_ABC) %>% 
+  pivot_longer(-c(n_AB, n_ABC)) |> 
+  separate(
+    name,
+    c('name_1', 'name_2'),
+    remove = FALSE
+  ) |> 
+  mutate(
+    name_2 = ifelse(is.na(name_2), '', name_2),
+    name_1 = factor(name_1, (c('N', 't', 'rho'))),
+    name_2 = factor(name_2, rev(c('ABC', 'AB', 'upper', '2', 'C', 'B', 'A', '')))
+    ) 
+
+tab_plt_2 <- tab2 %>% 
+  filter(idx != -1) %>% 
+  # filter(idx < 300) %>% 
+  group_by(n_AB, n_ABC, sim) %>% 
+  filter(loglik == max(loglik)) %>% 
+  ungroup() %>% 
+  select(-idx, -loglik, -time) %>% 
+  group_by(n_ABC) %>% 
+  pivot_longer(-c(sim, n_AB, n_ABC)) |> 
+  separate(
+    name,
+    c('name_1', 'name_2'),
+    remove = FALSE
+  )|> 
+  mutate(
+    name_2 = ifelse(is.na(name_2), '', name_2),
+    name_1 = factor(name_1, (c('N', 't', 'rho'))),
+    name_2 = factor(name_2, rev(c('ABC', 'AB', 'upper', '2', 'C', 'B', 'A', '')))
+    ) 
+
+tab_plt_2_lab <- tab_plt_2%>% 
+  group_by(name, name_1, name_2, n_ABC, n_AB) |> 
+  summarize(
+    mean_val = mean(value),
+    sd_val = sd(value)
+    )
+
+p_barplot <- tab_plt_2_lab |> 
+    ggplot() +
+  # geom_boxplot(aes(n_AB, value, color = as.character(n_AB))) +
+  geom_bar(aes(n_AB, mean_val, fill = as.character(n_AB)), stat="identity", alpha = 0.4) +
+  geom_errorbar(aes(x=n_AB, ymin=mean_val-sd_val, ymax=mean_val+sd_val, 
+                    color = as.character(n_AB)), width=0.6) +
+  # geom_text(aes(n_ABC, value, label = sim), color = 'blue', size = 5) +
+  geom_hline(aes(yintercept = value), color = 'black', data = true2, linetype = 2) +
+  facet_grid(name_1+name_2~n_ABC, scales = 'free_y',
+             labeller = label_bquote(rows = .(as.character(name_1)) [.(as.character(name_2))])
+             ) + 
+  # scale_y_continuous(labels = function(x) format(x, scientific = TRUE)) + 
+  scale_x_continuous(breaks = c(1, 3, 5, 7)) + 
+  theme_few()  +
+  labs(
+    title = TeX('Number of intervals in deep coalescence ($n_{ABC}$)'),
+    x = TeX('Number of intervals between speciation events ($n_{AB}$)')
+  ) +
+  theme(
+    plot.title = element_text(size = t_size, hjust = 0.5, margin = margin()),
+    legend.position = 'None',
+    strip.text.y = element_text(angle = 0, size = t_size),
+    axis.title.y = element_blank(),
+    axis.title.x = element_text(size = t_size),
+    axis.text.x = element_text(size = t_size-3),
+    strip.text.x = element_text(size = t_size-3)
+  ) +
+  scale_fill_manual(values = c("#009E73", "#0072B2", "#D55E00", "#CC79A7")) +
+  scale_color_manual(values = c("#009E73", "#0072B2", "#D55E00", "#CC79A7")) +
+  # expand_limits(y=0) +
+  NULL
+
+ggsave('../plots/barplot.pdf', p_barplot, height = 8, width = 7)
+
+```
+
+
