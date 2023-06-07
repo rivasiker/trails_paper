@@ -1,0 +1,211 @@
+---
+title: "Test"
+author: "Iker Rivas-González"
+date: "2023-06-02"
+output: html_document
+---
+
+```{r}
+
+library(tidyverse)
+theme_set(theme_bw())
+
+hid_tab <- read_csv('../data/hid_tab.csv', show_col_types = FALSE)
+tree_tab <- read_csv('../data/tree_tab.csv', show_col_types = FALSE)
+post_tab <- read_csv('../data/post_tab.csv', show_col_types = FALSE)
+tree_tab_cut <- read_csv('../data/tree_tab_cutpoints.csv', show_col_types = FALSE)
+post_tab_cut <- read_csv('../data/post_tab_cutpoints.csv', show_col_types = FALSE)
+
+n_int_AB = 5
+n_int_ABC_2 = 7
+n_int_ABC_1 = 4
+
+```
+
+```{r}
+
+tree_tab_cut_2 <- tree_tab_cut %>%
+    mutate(
+        start = end,
+        end = start+1,
+        topology_end = lead(topology),
+        int_1_end = lead(int_1),
+        int_2_end = lead(int_2)
+    )
+    
+tree_tab_2 <- tree_tab %>%
+    mutate(
+        start = end,
+        end = start+1,
+        topology_end = lead(topology),
+        int_1_end = lead(int_1),
+        int_2_end = lead(int_2)
+    )
+
+```
+
+```{r}
+
+p1 <- post_tab_cut %>%
+    mutate(is_V0 = topology == 0) %>%
+    group_by(pos, is_V0, int_1) %>%
+    summarize(prob = sum(value)) %>%
+    ggplot() +
+    rasterize(geom_tile(aes(pos, int_1+(!is_V0)*(n_int_AB), fill = prob, color = prob)), dpi = 300) +
+    geom_hline(aes(yintercept = n_int_AB-1+0.5), color = 'white') +
+    geom_segment(aes(x = start, xend = end, 
+                     y = int_1+(!(topology == 0))*(n_int_AB), yend = int_1+(!(topology == 0))*(n_int_AB)), 
+                 color = 'green3', size = 2,
+                 data = tree_tab_cut) +
+    # geom_segment(aes(x = start, xend = end, 
+    #                  y = int_1+(!(topology == 0))*(n_int_AB), yend = int_1_end+(!(topology_end == 0))*(n_int_AB)), 
+    #              color = 'green3', size = 1, lineend = 'round',
+    #              data = tree_tab_cut_2) +
+    scale_fill_viridis_c(name = 'Posterior\nprobability', 
+                         limits = c(0, 1),
+                         option="inferno"
+                        ) +
+    scale_color_viridis_c(name = 'Posterior\nprobability', 
+                         limits = c(0, 1),
+                         option="inferno"
+                         ) +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(
+        breaks = c(0:(n_int_AB-1), ((n_int_AB):(n_int_AB+n_int_ABC_1-1))), 
+        # labels = c(0:(n_int_AB-1), 0:(n_int_ABC_1-1)),
+        labels = paste0('F', c(0:(n_int_AB+n_int_ABC_1-1))),
+        expand = c(0, 0),
+        sec.axis = dup_axis(
+            # breaks = c(0:(n_int_AB-1), ((n_int_AB):(n_int_AB+n_int_ABC_1)))-0.5,
+            # labels = sprintf("%.0f", round(c(cut_AB[0:(length(cut_AB)-1)], cut_ABC_new)))
+            # labels = rep('', length(round(c(cut_AB[0:(length(cut_AB)-1)], cut_ABC_new))))
+        )
+    ) +
+    theme(
+        axis.title.y.right = element_blank()
+    ) +
+    labs(y = 'First coalescent', x = 'Position')
+
+```
+
+```{r}
+
+p2 <- post_tab %>%
+    group_by(pos, int_2) %>%
+    summarize(prob = sum(value)) %>%
+    ggplot() +
+    rasterize(geom_tile(aes(pos, int_2, fill = prob, color = prob)), dpi = 300) +
+    geom_segment(aes(x = start, xend = end, y = int_2, yend = int_2), 
+                 color = 'green3', size = 2, 
+                 data = tree_tab) +
+    # geom_segment(aes(x = start, xend = end, y = int_2, yend = int_2_end), 
+    #              color = 'green3', size = 1, lineend = 'round', linetype = 2,
+    #              data = tree_tab_2) +
+    scale_fill_viridis_c(name = 'Posterior\nprobability', 
+                         limits = c(0, 1),
+                         option="inferno") +
+    scale_color_viridis_c(name = 'Posterior\nprobability', 
+                         limits = c(0, 1),
+                         option="inferno") +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(
+        breaks = 0:(n_int_ABC_2-1), 
+        # labels = 0:(n_int_ABC_2-1),
+        labels = paste0('S', 0:(n_int_ABC_2-1)),
+        expand = c(0, 0),
+        sec.axis = dup_axis(
+            # breaks = (0:n_int_ABC_2)-0.5,
+            # labels = sprintf("%.0f", round(cut_ABC))
+            # breaks = seq(-0.5, n_int_ABC_2-0.5, 0.5),
+            # labels = c(rbind(rep('', length(cut_ABC)-1), paste0('S', 0:(n_int_ABC_2-1))), '')
+        )
+    ) +
+    labs(y = 'Second coalescent') +
+    theme(
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y.right = element_blank()
+    )
+
+```
+
+```{r}
+
+library(ggrastr)
+
+p3 <- post_tab %>%
+    group_by(pos, topology) %>%
+    summarize(prob = sum(value)) %>%
+    ggplot() +
+    rasterize(geom_tile(aes(pos, topology, fill = prob, color = prob)), dpi = 300) +
+    geom_segment(aes(x = start, xend = end, y = topology, yend = topology), 
+                 color = 'green3', size = 2,
+                 data = tree_tab) +
+    scale_fill_viridis_c(name = 'Posterior\nprobability', 
+                         limits = c(0, 1),
+                         option="inferno") +
+    scale_color_viridis_c(name = 'Posterior\nprobability', 
+                         limits = c(0, 1),
+                         option="inferno") +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(
+        breaks = c(0, 1, 2, 3), 
+        labels = c('V0', 'V1', 'V2', 'V3'),
+        expand = c(0, 0),
+        sec.axis = dup_axis()
+    ) +
+    labs(y = 'Topology') +
+    theme(
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y.right = element_blank()
+    )
+
+```
+
+```{r}
+
+p2_boxes <- ggplot() +
+    geom_rect(aes(xmin = 1, xmax = 2, ymin = start, ymax = end), 
+              fill = '#2c7bb6', color = 'black',
+              data = tibble(start = 0:n_int_ABC_2, end = 1:(n_int_ABC_2+1))) +
+    theme_void() +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) 
+    
+p1_boxes <- ggplot() +
+    geom_rect(aes(xmin = 1, xmax = 2, ymin = start, ymax = end), 
+              fill = '#d7191c', color = 'black',
+              data = tibble(start = 0:(n_int_AB+n_int_ABC_1-1), end = 1:(n_int_AB+n_int_ABC_1))) +
+    theme_void() +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_continuous(expand = c(0, 0)) 
+
+
+```
+
+```{r}
+
+library(patchwork)
+
+fac <- 0.7 
+
+# plt_tot <- ((p3/p2/p1) | (plot_spacer()/p2_boxes/p1_boxes) + 
+#   plot_layout(heights = c(4, n_int_ABC_2, n_int_AB+n_int_ABC_1), widths = c(100, 1), guides = 'collect')) & theme(legend.position = 'none')
+
+plt_tot <- (p3+plot_spacer()+p2+p2_boxes+p1+p1_boxes + 
+  plot_layout(ncol = 2, heights = c(4, n_int_ABC_2, n_int_AB+n_int_ABC_1), widths = c(100, 1), guides = 'collect')) & theme(legend.position = 'none')
+
+ggsave(paste0('../plots/test.pdf'), plt_tot, 
+       width = 14*fac, height = 9*fac)
+
+```
+
+
+
+
+
+
+

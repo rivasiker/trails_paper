@@ -4,7 +4,7 @@ format: html
 editor: visual
 ---
 
-```{r}
+```{r setup}
 
 library(tidyverse)
 library(glue)
@@ -52,7 +52,7 @@ model <- 'error'
 mu <- 1.5e-8
 
 tab2 <- tibble()
-for (n_AB in c(1, 3, 5)) {
+for (n_AB in c(1, 3, 5, 7)) {
   print(n_AB)
   for (n_ABC in c(1, 3, 5)) {
     for (sim in 1:nsim) {
@@ -218,5 +218,3 @@ p_barplot <- tab_plt_2_lab |>
 ggsave('../plots/barplot.pdf', p_barplot, height = 8, width = 7)
 
 ```
-
-
