@@ -1,0 +1,2 @@
+#hg38.knownGene.name	hg38.knownGene.chrom	hg38.knownGene.strand	hg38.knownGene.txStart	hg38.knownGene.txEnd	hg38.knownGene.cdsStart	hg38.knownGene.cdsEnd	hg38.knownGene.exonCount	hg38.knownGene.exonStarts	hg38.knownGene.exonEnds	hg38.knownGene.proteinID	hg38.knownGene.alignID
+ENST00000371360.2	chr1	-	54007297	54018186	54008981	54018112	6	54007297,54010281,54012142,54014235,54017375,54018091,	54009130,54010410,54012280,54014364,54017427,54018186,	Q5T700	uc001cwm.4
