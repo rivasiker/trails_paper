@@ -52,7 +52,7 @@ model <- 'error'
 mu <- 1.5e-8
 
 tab2 <- tibble()
-for (n_AB in c(1, 3, 5, 7)) {
+for (n_AB in c(1, 3, 5)) {
   print(n_AB)
   for (n_ABC in c(1, 3, 5)) {
     for (sim in 1:nsim) {
@@ -153,7 +153,7 @@ true2 <- tab2 %>%
   mutate(
     name_2 = ifelse(is.na(name_2), '', name_2),
     name_1 = factor(name_1, (c('N', 't', 'rho'))),
-    name_2 = factor(name_2, rev(c('ABC', 'AB', 'upper', '2', 'C', 'B', 'A', '')))
+    name_2 = factor(name_2, rev(c('AB', 'ABC', 'A', 'B', 'C', '2', 'upper', '')))
     ) 
 
 tab_plt_2 <- tab2 %>% 
@@ -173,7 +173,7 @@ tab_plt_2 <- tab2 %>%
   mutate(
     name_2 = ifelse(is.na(name_2), '', name_2),
     name_1 = factor(name_1, (c('N', 't', 'rho'))),
-    name_2 = factor(name_2, rev(c('ABC', 'AB', 'upper', '2', 'C', 'B', 'A', '')))
+    name_2 = factor(name_2, rev(c('AB', 'ABC', 'A', 'B', 'C', '2', 'upper', '')))
     ) 
 
 tab_plt_2_lab <- tab_plt_2%>% 
@@ -192,9 +192,13 @@ p_barplot <- tab_plt_2_lab |>
   # geom_text(aes(n_ABC, value, label = sim), color = 'blue', size = 5) +
   geom_hline(aes(yintercept = value), color = 'black', data = true2, linetype = 2) +
   facet_grid(name_1+name_2~n_ABC, scales = 'free_y',
-             labeller = label_bquote(rows = .(as.character(name_1)) [.(as.character(name_2))])
+             labeller = label_bquote(rows = .(as.character(name_1)) [.(as.character(name_2))]),
+             switch="y"
              ) + 
-  # scale_y_continuous(labels = function(x) format(x, scientific = TRUE)) + 
+  scale_y_continuous(
+    position = "right",
+    # labels = function(x) format(x, scientific = TRUE)
+    ) + 
   scale_x_continuous(breaks = c(1, 3, 5, 7)) + 
   theme_few()  +
   labs(
@@ -204,7 +208,7 @@ p_barplot <- tab_plt_2_lab |>
   theme(
     plot.title = element_text(size = t_size, hjust = 0.5, margin = margin()),
     legend.position = 'None',
-    strip.text.y = element_text(angle = 0, size = t_size),
+    strip.text.y.left = element_text(angle = 0, size = t_size),
     axis.title.y = element_blank(),
     axis.title.x = element_text(size = t_size),
     axis.text.x = element_text(size = t_size-3),
@@ -216,5 +220,7 @@ p_barplot <- tab_plt_2_lab |>
   NULL
 
 ggsave('../plots/barplot.pdf', p_barplot, height = 8, width = 7)
+
+p_barplot
 
 ```
