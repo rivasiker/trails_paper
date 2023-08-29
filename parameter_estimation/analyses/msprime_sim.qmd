@@ -220,6 +220,7 @@ p_barplot <- tab_plt_2_lab |>
   NULL
 
 ggsave('../plots/barplot.pdf', p_barplot, height = 8, width = 7)
+ggsave('~/Downloads/barplot_poster.pdf', p_barplot, height = 8, width = 7)
 
 p_barplot
 
