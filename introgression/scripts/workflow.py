@@ -15,7 +15,7 @@ t_3 = (6_000_000-t_2)/g
 t_A = t_1
 t_B = t_1
 t_C = t_1+t_2
-r = 1e-8/mu
+r = 1e-8
 
 t_m = t_1-40_000/g
 m = 0.05
@@ -37,7 +37,7 @@ for n_int_AB in [1]:
             tot_lst.append('simulate_{}_{}_{}_{}'.format(n_int_AB, n_int_ABC, seed, model))
             gwf.target('simulate_{}_{}_{}_{}'.format(n_int_AB, n_int_ABC, seed, model),
                 inputs=['optimize_introgression.py'],
-                outputs=['../results/{}_{}_{}_{}_{}.csv'.format(x, n_int_AB, n_int_ABC, seed, model) for x in ['trees', 'sim']],
+                outputs=['../results/{}_{}_{}_{}_{}.csv'.format(x, n_int_AB, n_int_ABC, seed, model) for x in ['sim']],
                 cores=n_int_ABC,
                 memory='{}g'.format(n_int_ABC*4),
                 walltime= '{}:00:00'.format(dct[n_int_ABC]),

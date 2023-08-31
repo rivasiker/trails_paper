@@ -2,7 +2,7 @@ import sys
 from trails.optimizer import trans_emiss_calc_introgression
 from trails.cutpoints import cutpoints_ABC, cutpoints_AB
 import numpy as np
-from trails.optimizer import loglik_wrapper, write_list, optimizer
+from trails.optimizer import loglik_wrapper, write_list, optimizer_introgression
 import pandas as pd
 import time
 import re
@@ -10,6 +10,8 @@ import msprime
 
 
 ####################### Model parameters #######################
+
+print('Model parameters')
 
 n_sites = 10_000_000
 
@@ -54,6 +56,8 @@ dct = {v: k for k, v in observed_states.items()}
 
 ####################### Add demography #######################
 
+print('Simulating demography')
+
 demography = msprime.Demography()
 demography.add_population(name="A", initial_size=N_AB, default_sampling_time=t_1-t_A)
 demography.add_population(name="B", initial_size=N_AB, default_sampling_time=t_1-t_B)
@@ -82,6 +86,8 @@ ts = msprime.sim_ancestry(
 
 ####################### Feature extraction #######################
 
+print('Extracting features')
+
 left_lst = []
 right_lst = []
 tree_lst = []
@@ -96,7 +102,7 @@ for t in ts.trees():
 len_lst = (np.array(right_lst)-np.array(left_lst)+1)
 
 dat_sim = pd.DataFrame({'tree':tree_lst, 'len':len_lst})
-dat_sim.to_csv('../results/trees_{}_{}_{}_{}.csv'.format(n_int_AB, n_int_ABC, seed, model), index = False)
+# dat_sim.to_csv('../results/trees_{}_{}_{}_{}.csv'.format(n_int_AB, n_int_ABC, seed, model), index = False)
 
 #### Add mutations
 
@@ -116,11 +122,11 @@ for i in range(len(mut_loc)):
 
 E = sim_genome
 
-pd.DataFrame({'E':E}).to_csv('../results/obs_{}_{}_{}_{}.csv'.format(n_int_AB, n_int_ABC, seed, model), index = False)
+# pd.DataFrame({'E':E}).to_csv('../results/obs_{}_{}_{}_{}.csv'.format(n_int_AB, n_int_ABC, seed, model), index = False)
 
 ####################### Optimization #######################
 
-
+print('Optimizing')
 
 # t_init_1 = np.random.normal(t_1, t_1/5)
 # t_init_2 = np.random.normal(t_2, t_2/5)
@@ -161,9 +167,7 @@ t_init_m = np.random.normal(t_m, t_m/5)
 N_init_AB = np.random.normal(N_AB, N_AB/5)
 N_init_ABC = np.random.normal(N_ABC, N_ABC/5)
 r_init = np.random.normal(r, r/5)
-b = 2
-a = b*m/(1-m)
-m_init = np.random.beta(a, b)
+m_init = m
 
 dct = {
     't_A':     [t_init_A,     t_init_A/10, t_init_A*10], 
@@ -171,7 +175,7 @@ dct = {
     't_C':     [t_init_C,     t_init_C/10, t_init_C*10], 
     't_2':     [t_init_2,     t_init_2/10, t_init_2*10], 
     't_upper': [t_init_upper, t_init_upper/10, t_init_upper*10], 
-    't_m':     [t_init_m,     0.0001, t_B/2], 
+    't_m':     [t_init_m,     0, t_B/2], 
     'N_AB':    [N_init_AB,    N_init_AB/10,  N_init_AB*10], 
     'N_ABC':   [N_init_ABC,   N_init_ABC/10,  N_init_ABC*10], 
     'r':       [r_init,       r_init/10,  r_init*10],
@@ -179,7 +183,7 @@ dct = {
     }
 
 dct2 = {'n_int_AB':n_int_AB, 'n_int_ABC':n_int_ABC}
-res = optimizer(
+res = optimizer_introgression(
     optim_params = dct, 
     fixed_params = dct2, 
     V_lst = [E], 
