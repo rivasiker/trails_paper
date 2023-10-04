@@ -15,7 +15,7 @@ library(latex2exp)
 
 ```{r}
 
-nsim <- 5
+nsim <- 20
 
 # model <- 'fixed'
 # 
