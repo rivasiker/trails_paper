@@ -22,7 +22,7 @@ for n_int_AB in [1, 3, 5]:
     for n_int_ABC in [1, 3, 5]:
         for seed in range(1, 6):
             if exists(f'../results/sim_{n_int_AB}_{n_int_ABC}_{seed}_fixed_model.csv'):
-                pass
+                continue
             tot_lst.append('simulate_{}_{}_{}_fixed_model'.format(n_int_AB, n_int_ABC, seed))
             gwf.target('simulate_{}_{}_{}_fixed_model'.format(n_int_AB, n_int_ABC, seed), 
                 inputs=['optimize_2.py'], 
@@ -34,17 +34,18 @@ for n_int_AB in [1, 3, 5]:
             python optimize_2.py {} {} {} {} {} {} {} {} {} {} fixed_model
             """.format(seed, t_1, t_2, t_3, N_AB, N_ABC, r, mu, n_int_AB, n_int_ABC)
 
-dct = {1:8, 2:30,  3:57, 4:90, 5:121, 7:251}
+dct = {1:15, 2:30,  3:57, 4:90, 5:180, 7:251}
 
 t_A = t_1
 t_B = t_1
 t_C = t_1+t_2
 
-for n_int_AB in [1, 3, 5]:
-    for n_int_ABC in [1, 3, 5]:
-        for seed in range(1, 6):
+for n_int_AB in [1, 5]:
+    for n_int_ABC in [1]:
+        n_int_ABC = n_int_AB
+        for seed in range(1, 21):
             if exists(f'../results/sim_{n_int_AB}_{n_int_ABC}_{seed}_error_model.csv'):
-                pass
+                continue
             tot_lst.append('simulate_{}_{}_{}_error_model'.format(n_int_AB, n_int_ABC, seed))
             gwf.target('simulate_{}_{}_{}_error_model'.format(n_int_AB, n_int_ABC, seed),
                 inputs=['optimize_4.py'],
