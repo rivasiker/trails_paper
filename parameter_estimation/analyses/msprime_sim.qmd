@@ -226,7 +226,6 @@ p_barplot
 
 ```
 
-
 ```{r}
 
 true3 <- true2 |> 
@@ -253,7 +252,6 @@ tab_plt_2 |>
   
 
 ```
-
 
 ```{r}
 
@@ -338,5 +336,7 @@ tab_plt_2 |>
   # geom_boxplot(aes(name, value, color = as.character(n_AB))) +
   # theme_few() 
   
+
+ggsave('../plots/new_figure_2.pdf', height = 5, width = 7)
 
 ```
