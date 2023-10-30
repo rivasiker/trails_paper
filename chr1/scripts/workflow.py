@@ -4,7 +4,8 @@ gwf = Workflow()
 
 
 gwf.target(f"chr1_maffilter",
-    inputs=['../data/chr1.maf.gz'],
+    # inputs=['../data/chr1.maf.gz'],
+    inputs=[],
     outputs=['../data/chr1.filtered.maf'],
     cores=1,
     memory='4g',
@@ -36,7 +37,7 @@ for i in range(start, end-interval, interval):
         memory='4g',
         walltime= '1:00:00',
         account='Primategenomes') << f"""
-    python maf_extract_region.py ../data/chr1.filtered.{i} hg38.chr1 {i} {i+interval}
+    python maf_extract_region_new.py ../data/chr1.filtered hg38.chr1 {i} {i+interval}
     """
 
 
