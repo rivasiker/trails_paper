@@ -1,0 +1,230 @@
+---
+title: "Bell numbers"
+format: html
+editor: visual
+---
+
+One way of representing the state space of the CTMCs is to tag each uncoalesced lineage with an integer of a minimally superincreasing sequence of integers. The coalesced lineages would then correspond to sums of such integers. 
+
+Let's take a sample size of 3 as an example. A superincreasing sequence of size 3 would be (1, 2, 4), each integer corresponding to uncoalesced lineages at one of the sides. If sequences 1 and 2 coalesce, then that lineage would be tagged with 1+2=3, if instead 1 and 4 coalesced, then it would correspond to 1+4=5, and so on. When all sequences coalesce, it would correspond to summing all integers of the series, so 1+2+4=7 when n=3. 
+
+The following function can be used to obtain all possible sums for a set of integers:
+
+```{r}
+
+# Function to calculate the sum of all combinations
+sum_of_combinations <- function(vec) {
+  # Initialize an empty vector to store the sums
+  sums <- numeric(0)
+  
+  # Loop through the number of elements in the vector
+  for (i in 1:length(vec)) {
+    # Generate all combinations of length i
+    combos <- combn(vec, i)
+    
+    # Calculate the sum of each combination and append to the sums vector
+    sums <- c(sums, colSums(combos))
+  }
+  
+  return(sums)
+}
+
+# Example usage
+vector <- c(1, 2, 4)
+result <- sum_of_combinations(vector)
+
+# Print the result
+print(result)
+
+```
+
+Using this representation, we can go ahead and code hidden states. The state where nothing has coalesced and no recombination has happened can be represented as such:
+```
+1--1
+2--2
+4--4
+```
+If a recombination has happened in lineage 1, then that state corresponds to
+```
+1-
+  -1
+2--2
+4--4
+```
+Or, more conveniently:
+```
+1--0
+0--1
+2--2
+4--4
+```
+If not the first and the third chromosome coalesce, the resulting state can be represented as such:
+```
+0--1
+3--2
+4--4
+```
+And so on.
+
+We can list all possible hidden states given a certain number of starting lineages given the fact that the number of states correspond to the even entries of the Bell number series, i.e., all possible partitions of a set. Each uncoalesced site can be thought of an element of a possible set. Assuming again that n=3, there are 3 of such lineages in the left and 3 in the right. When generating all possible 203 partitions of 2x3=6 elements, we can then interpret the generated sets in two different ways. If two of the sites at the left site (or the right site) fall within the same set, then the will be treated as coalesced. If instead one left site and one right site fall within the same set, they will be sitting in the same chromosome. 
+
+For example, the following state
+```
+0--1
+3--2
+4--4
+```
+corresponds to a set partition of (A, A, B, C, A, C), assuming that, in order, the sets A, B and C correspond to lineages (1_left, 2_left, 4_left, 1_right, 2_right, 4_right). 
+
+Following these rules, we can enumerate all possible states for any number of starting lineages. The following code can be used to achieve this:
+
+
+```{r}
+
+library(reticulate)
+use_condaenv("phasetype")
+
+```
+
+```{r}
+
+library(partitions)
+
+# This function converts "c(0, 0)" into a vector
+f <- function(x) eval(parse(text = x))
+
+# Number of lineages
+n <- 3
+# Vector of integers corresponding to a minimally superincreasing
+# series. Each integer is a tag for an uncoalesced lineage. 
+vector <- 2^(0:(n-1))
+# Get all partitions for 2x number of lineages
+mat <- setparts(2*n) |> 
+  as.matrix()
+
+# Create empty list of states
+state_space <- list()
+# For each partition
+for (i in 1:ncol(mat)) {
+  # Obtain partition
+  part <- mat[,i]
+  # Create list for storing chromosomes
+  state <- list()
+  # For each group in partition
+  for (g in sort(unique(part))) {
+    # Get index of elements in group for the left site
+    left <- which(part[1:n] == g)
+    # Get index of elements in group for the right site
+    right <- which(part[(n+1):(n*2)] == g)
+    # Save chromosome corresponding to the group
+    state[[g]] <- c(sum(vector[left]), sum(vector[right]))
+  }
+  # Order each state and save it on the list
+  state_space[[i]] <- state |> as.character() |> sort() |> lapply(f)
+}
+
+
+# lapply(state_space[[100]], f)
+
+state_space_py <- r_to_py(state_space)
+
+
+```
+
+Once the state space is generated, we can find all possible transitions between the different states by applying a set of rules. There can only be three different phenomena:
+* A recombination event, where a two linked sites, one on the left and one on the right, become unlinked. 
+* A reversible coalescent event, which is the opposite of a recombination event and, thus, left and right sites sitting in different chromosomes now become linked.
+* An irreversible coalescent event, in which two sites at the same side (either left or right) coalesce. 
+
+```{python}
+
+def recombination(i):
+    """
+    This function returns all possible states after a 
+    single recombination event given an initial state
+    """
+    # Create empty list
+    new_lst = []
+    # For each block index in the list
+    for block in range(len(i)):
+        # If the site is linked
+        if 0 not in i[block]:
+            # Remove block
+            lst = i[:block]+i[block+1:]
+            # Split block
+            lst = lst + [(i[block][0], 0), (0, i[block][1])]
+            # Append to list
+            new_lst.append(sorted(lst))
+    return new_lst
+  
+def coalescent(i):
+    """
+    This function returns all possible states after a 
+    single coalescence event given an initial state. 
+    The returned list is somewhat ordered, so that the 
+    first states correspond to reversible coalescence 
+    events, and the last to non-reversible ones.
+    """
+    # Get unique values per site
+    n_0 = set([0]+list(sum(i, ())))
+    reversible = []
+    nonreversible = []
+    # For each combination of blocks
+    for b1 in range(len(i)):
+        for b2 in range(b1+1, len(i)):
+            # Create new block by merging
+            add_lst = [(i[b1][0]+i[b2][0], i[b1][1]+i[b2][1])]
+            # For each index in i
+            for b3 in range(len(i)):
+                # If the index is not in among the merged blocks
+                if b3 not in [b1, b2]:
+                    # Append to list
+                    add_lst.append(i[b3])
+            # If the unique values are different from the 
+            # original block
+            if set([0]+list(sum(add_lst, ()))) == n_0:
+                # Append to reversible coalescence list
+                reversible.append(sorted(add_lst))
+            else:
+                # Append to non-reversible coalescence list
+                nonreversible.append(sorted(add_lst))
+    l = reversible+nonreversible
+    return l
+
+```
+
+We can define a certain recombination and coalescent rate, and compute the transitions:
+
+```{python}
+
+import numpy as np
+from tqdm import tqdm
+
+rho = 1
+coal = 2
+lst = r.state_space_py
+lst = [sorted([(int(j[0]), int(j[1])) for j in i]) for i in lst]
+
+mat = np.zeros((len(lst), len(lst)))
+
+# For each state, apply the rules
+for i in tqdm(lst):
+  i_idx = lst.index(i)
+  for j in recombination(i):
+    j_idx = lst.index(j)
+    mat[i_idx, j_idx] = rho
+  for j in coalescent(i):
+    j_idx = lst.index(j)
+    mat[i_idx, j_idx] = coal
+for i in range(len(lst)):
+  mat[i, i] = -sum(mat[i,])
+  
+# Number of non-zero entries in the rate matrix
+(mat != 0).sum()/len(mat)**2
+
+
+```
+
+
+
+

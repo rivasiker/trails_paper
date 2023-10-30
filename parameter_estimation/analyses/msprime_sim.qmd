@@ -320,7 +320,7 @@ tab_plt_2 |>
                    color = as.character(n_AB)), data = meanvals) +
   # geom_jitter(aes(value, nam, color = as.character(n_AB))) +
   geom_vline(aes(xintercept = 0), linetype = 2) +
-  geom_point(aes(value, nam+(1/6)*sim-0.5, color = as.character(n_AB)), shape = 21) +
+  geom_point(aes(value, nam+(1/(nsim+1))*sim-0.5, color = as.character(n_AB)), shape = 21) +
   theme_few() +
   scale_y_continuous(breaks=fornames$nam, 
                      labels=TeX(paste0('$', fornames$name_1, '_{', fornames$name_2, '}$')), 
