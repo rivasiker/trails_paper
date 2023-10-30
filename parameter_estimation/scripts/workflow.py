@@ -34,7 +34,7 @@ for n_int_AB in [1, 3, 5]:
             python optimize_2.py {} {} {} {} {} {} {} {} {} {} fixed_model
             """.format(seed, t_1, t_2, t_3, N_AB, N_ABC, r, mu, n_int_AB, n_int_ABC)
 
-dct = {1:15, 2:30,  3:57, 4:90, 5:180, 7:251}
+dct = {1:15, 2:30,  3:57, 4:90, 5:121, 7:251}
 
 t_A = t_1
 t_B = t_1
