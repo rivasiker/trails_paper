@@ -27,6 +27,18 @@ gwf.target(f"chr1_extract_region",
 python maf_extract_region.py ../data/chr1.filtered hg38.chr1 {start} {end}
 """
 
+interval = 1000000
+for i in range(start, end-interval):
+    gwf.target(f"chr1_extract_region",
+        inputs=['../data/chr1.filtered.maf'],
+        outputs=[f'../data/chr1.filtered.{i}.region.maf'],
+        cores=1,
+        memory='4g',
+        walltime= '1:00:00',
+        account='Primategenomes') << f"""
+    python maf_extract_region.py ../data/chr1.filtered.{i} hg38.chr1 {i} {i+interval}
+    """
+
 
 n_int_AB = 3
 n_int_ABC = 3
