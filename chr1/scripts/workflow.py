@@ -83,3 +83,17 @@ for method in ['L-BFGS-B', 'Nelder-Mead']:
     python optimize_5.py {n_int_AB} {n_int_ABC} {method}
     """
 
+n_int_AB = 1
+n_int_ABC = 5
+method = 'Nelder-Mead'
+interval = 1000000
+for i in range(start, end-interval, interval):
+    gwf.target(f"chr1_{method.replace('-', '')}_newparam_second_run",
+        inputs=[f'../data/chr1.filtered.{i}.region.maf', "../results/chr1_L-BFGS-B.csv"],
+        outputs=[f"../results/chr1_{method}_second_run_{i}.csv"],
+        cores=6,
+        memory='12g',
+        walltime= '{}:00:00'.format(120),
+        account='Primategenomes') << f"""
+    python optimize_6.py {n_int_AB} {n_int_ABC} {method} {i}
+    """
