@@ -1,0 +1,26 @@
+---
+title: "Confidence intervals"
+format: html
+editor: visual
+---
+
+```{r}
+
+library(tidyverse)
+
+tab <- read_csv('../results/chr1_Nelder-Mead_third_run.csv')
+
+mod <- lm(loglik ~ polym(t_A, degree=2, raw=TRUE), data = tab)
+
+x_predict <- seq(min(tab$t_A), max(tab$t_A), length.out = 1000)
+y_predict <- predict(mod, newdata = tibble(t_A = x_predict))
+
+summary(mod)
+
+ggplot() +
+  geom_point(aes(t_A, loglik), data = tab) +
+  geom_line(aes(x_predict, y_predict))
+  
+
+```
+
