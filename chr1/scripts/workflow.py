@@ -28,8 +28,8 @@ python maf_extract_region.py ../data/chr1.filtered hg38.chr1 {start} {end}
 """
 
 interval = 1000000
-for i in range(start, end-interval):
-    gwf.target(f"chr1_extract_region",
+for i in range(start, end-interval, interval):
+    gwf.target(f"chr1_extract_region_{i}",
         inputs=['../data/chr1.filtered.maf'],
         outputs=[f'../data/chr1.filtered.{i}.region.maf'],
         cores=1,
