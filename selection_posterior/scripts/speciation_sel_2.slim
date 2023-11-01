@@ -4,9 +4,8 @@
 initialize() {
 	if (exists("slimgui"))
  	{  
- 		defineConstant("name", "../results/sim_45ILS_0.5sel_deep"); 
- 		
- 		defineConstant("seed", 10); 
+ 		defineConstant("seed", 29); 
+ 		defineConstant("name", "../results/replicates/sim_45ILS_0.5sel_deep_"+seed); 
  		defineConstant("mu", 3e-6);
  		defineConstant("rho", 1e-6);
 		defineConstant("burnin", 10000);

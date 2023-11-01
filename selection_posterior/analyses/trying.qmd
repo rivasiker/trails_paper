@@ -1,0 +1,20 @@
+---
+title: "trying"
+format: html
+editor: visual
+---
+
+```{r}
+
+library(tidyverse)
+
+tree_tab_second_replicate <- tibble()
+post_tab_second_replicate <- tibble()
+for (i in 10:14) {
+  print(i)
+    post_tab_second_replicate <- bind_rows(post_tab_second_replicate, read_csv(paste0('../results/replicates/post_tab_second_', i,'.csv'), show_col_types = FALSE) %>% mutate(nsim = i))
+    tree_tab_second_replicate <- bind_rows(tree_tab_second_replicate, read_csv(paste0('../results/replicates/tree_tab_second_', i,'.csv'), show_col_types = FALSE) %>% mutate(nsim = i))
+}
+
+```
+
