@@ -24,3 +24,4 @@ chr1/analyses/tmp/test_194_p1.csv
 chr1/analyses/tmp/test_194_p2.csv
 introgression/scripts/hidden_states.csv
 introgression/scripts/observed_states.csv
+simulated_posterior/results/replicates/post_tab*
