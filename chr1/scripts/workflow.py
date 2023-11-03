@@ -57,6 +57,7 @@ t_B = t_1
 t_C = t_1+t_2
 
 for method in ['L-BFGS-B', 'Nelder-Mead']:
+    continue
     # print(f"../results/chr21_{method}.csv")
     gwf.target(f"chr1_{method.replace('-', '')}_newparam",
         inputs=['../data/chr1.filtered.region.maf'],
@@ -72,6 +73,7 @@ n_int_AB = 1
 n_int_ABC = 5
 
 for method in ['L-BFGS-B', 'Nelder-Mead']:
+    continue
     # print(f"../results/chr21_{method}.csv")
     gwf.target(f"chr1_{method.replace('-', '')}_newparam_second_run",
         inputs=['../data/chr1.filtered.region.maf', "../results/chr1_L-BFGS-B.csv"],
@@ -88,7 +90,7 @@ n_int_ABC = 5
 method = 'Nelder-Mead'
 interval = 1000000
 for i in range(start, end-interval, interval):
-    gwf.target(f"chr1_{method.replace('-', '')}_newparam_second_run",
+    gwf.target(f"chr1_{method.replace('-', '')}_newparam_second_run_{i}",
         inputs=[f'../data/chr1.filtered.{i}.region.maf', "../results/chr1_L-BFGS-B.csv"],
         outputs=[f"../results/chr1_{method}_second_run_{i}.csv"],
         cores=6,
