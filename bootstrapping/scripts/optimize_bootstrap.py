@@ -21,7 +21,7 @@ df = df[df['loglik'] == df['loglik'].max()]
 # Convert parameter estimates into dictionary
 dct = dict(zip(list(df.columns), df.iloc[0].to_list()))
 
-n_sites = 50_000
+n_sites = 50_000_000
 
 cut_ABC = cutpoints_ABC(n_int_ABC, 1)*dct["N_ABC"]
 t_out = (((dct["t_A"]+dct["t_B"])/2+dct["t_2"])+dct["t_C"])/2 + cut_ABC[n_int_ABC-1]*dct["N_ABC"] + dct["t_upper"] + 2*dct["N_ABC"]
