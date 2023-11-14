@@ -300,7 +300,8 @@ meanvals <- tab_plt_2 |>
   full_join(true3, by = c('n_AB', 'n_ABC', 'name', 'name_1', 'name_2', 'nam')) |> 
   mutate(value = (value.x-value.y)/value.y) |> 
   group_by(n_AB, n_ABC, name, name_1, name_2, nam) |> 
-  summarise(mean_val = mean(value))
+  summarise(mean_val = median(value), 
+            qua1 = quantile(value, 0.25), qua2 = quantile(value, 0.75))
 
 tab_plt_2 |> 
   filter((n_AB == 1 & n_ABC == 1) | (n_AB == 5 & n_ABC == 5)) |> 
@@ -311,20 +312,23 @@ tab_plt_2 |>
   mutate(value = (value.x-value.y)/value.y) |>
   ggplot() +
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin-.5, ymax = ymax+.5), 
-            fill = 'grey80',
+            fill = 'grey93',
             data = tibble(xmin = -Inf, xmax = Inf, ymin = c(1, 3, 5, 7), ymax = c(1, 3, 5, 7))) +
   geom_rect(aes(xmin = xmin, xmax = xmax, ymin = ymin-.5, ymax = ymax+.5), 
             fill = 'white',
             data = tibble(xmin = -Inf, xmax = Inf, ymin = c(2, 4, 6, 8), ymax = c(2, 4, 6, 8))) +
   geom_segment(aes(x = mean_val, xend = mean_val, y = nam-0.5, yend = nam+0.5, 
-                   color = as.character(n_AB)), data = meanvals) +
+                   color = as.character(n_AB)), size = 1, data = meanvals) +
+  geom_segment(aes(x = qua1, xend = qua2, y = nam, yend = nam, 
+                   color = as.character(n_AB)), size = 1, data = meanvals) +
   # geom_jitter(aes(value, nam, color = as.character(n_AB))) +
-  geom_vline(aes(xintercept = 0), linetype = 2) +
   geom_point(aes(value, nam+(1/(nsim+1))*sim-0.5, color = as.character(n_AB)), shape = 21) +
+   geom_vline(aes(xintercept = 0), linetype = 2) +
   theme_few() +
   scale_y_continuous(breaks=fornames$nam, 
                      labels=TeX(paste0('$', fornames$name_1, '_{', fornames$name_2, '}$')), 
                      expand = c(0, 0)) +
+  scale_color_manual(values = c('#de77ae', '#7fbc41')) +
   xlab('(estimated - true) / estimated') +
   ylab('Parameter') +
   labs(color = TeX('Number of intervals ($n_{AB} = n_{ABC}$)')) +
@@ -336,7 +340,38 @@ tab_plt_2 |>
   # geom_boxplot(aes(name, value, color = as.character(n_AB))) +
   # theme_few() 
   
-
-ggsave('../plots/new_figure_2.pdf', height = 5, width = 7)
+mult <- 1.2
+ggsave('../plots/new_figure_2.pdf', height = 5/mult, width = 7/mult)
 
 ```
+
+
+
+
+```{r}
+
+tab_plt_2 |> 
+  filter((n_AB == 1 & n_ABC == 1) | (n_AB == 5 & n_ABC == 5)) |> 
+  # filter(name %in% c('t_A', 't_B', 't_C', 't_2', 'N_AB', 'N_ABC')) |> 
+  # filter(name != 'rho') |> 
+  mutate(nam = as.numeric(as.factor(name))) |> 
+  full_join(true3, by = c('n_AB', 'n_ABC', 'name', 'name_1', 'name_2', 'nam')) |> 
+  mutate(value = (value.x-value.y)/value.y) |>
+  ggplot() +
+  geom_rect(aes(ymin = xmin, ymax = xmax, xmin = ymin-.5, xmax = ymax+.5), 
+            fill = 'grey80',
+            data = tibble(xmin = -Inf, xmax = Inf, ymin = c(1, 3, 5, 7), ymax = c(1, 3, 5, 7))) +
+  geom_rect(aes(ymin = xmin, ymax = xmax, xmin = ymin-.5, xmax = ymax+.5), 
+            fill = 'white',
+            data = tibble(xmin = -Inf, xmax = Inf, ymin = c(2, 4, 6, 8), ymax = c(2, 4, 6, 8))) +
+  geom_boxplot(aes(nam, value, color = as.character(n_AB), group = paste0(n_AB, nam))) +
+  geom_hline(aes(yintercept = 0), linetype = 2) +
+  theme_few() +
+  coord_flip() +
+  scale_x_continuous(breaks=fornames$nam, 
+                     labels=TeX(paste0('$', fornames$name_1, '_{', fornames$name_2, '}$')), 
+                     expand = c(0, 0)) +
+  scale_color_manual(values = c('#de77ae', '#7fbc41'), breaks = c(5, 1))
+
+```
+
