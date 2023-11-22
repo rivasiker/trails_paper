@@ -23,7 +23,7 @@ dct = dict(zip(list(df.columns), df.iloc[0].to_list()))
 
 n_sites = 50_000_000
 
-cut_ABC = cutpoints_ABC(n_int_ABC, 1)*dct["N_ABC"]
+cut_ABC = cutpoints_ABC(n_int_ABC, 1)
 t_out = (((dct["t_A"]+dct["t_B"])/2+dct["t_2"])+dct["t_C"])/2 + cut_ABC[n_int_ABC-1]*dct["N_ABC"] + dct["t_upper"] + 2*dct["N_ABC"]
 
 ####################### Simulation #######################
@@ -65,14 +65,14 @@ loglik = loglik_wrapper(transitions, emissions, starting, [obs])
 
 write_list([-1, t_A, t_B, t_C, t_2, t_upper, N_AB, N_ABC, r, loglik, 0], '../results/sim_{}_{}_{}_{}.csv'.format(n_int_AB, n_int_ABC, seed, model))
 
-t_init_A = np.random.normal(t_A, t_A/5)
-t_init_B = np.random.normal(t_B, t_B/5)
-t_init_C = np.random.normal(t_C, t_C/5)
-t_init_2 = np.random.normal(t_2, t_2/5)
-t_init_upper = np.random.normal(t_upper, t_upper/5)
-N_init_AB = np.random.normal(N_AB, N_AB/5)
-N_init_ABC = np.random.normal(N_ABC, N_ABC/5)
-r_init = np.random.normal(r, r/5)
+t_init_A = t_A
+t_init_B = t_B
+t_init_C = t_C
+t_init_2 = t_2
+t_init_upper = t_upper
+N_init_AB = N_AB
+N_init_ABC = N_ABC
+r_init = r
 
 dct = {
     't_A':     [t_init_A,     t_init_A/10, t_init_A*10], 

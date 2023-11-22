@@ -4,7 +4,7 @@ gwf = Workflow()
 
 n_int_AB = 1
 n_int_ABC = 5
-nsim =40
+nsim = 20
 
 for method in ['Nelder-Mead']:
     for seed in range(nsim):
