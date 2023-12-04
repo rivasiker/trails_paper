@@ -1,7 +1,2 @@
-2023-11-11 04:27:19,410	INFO worker.py:1553 -- Started a local Ray instance.
-Traceback (most recent call last):
-  File "optimize_bootstrap.py", line 66, in <module>
-    write_list([-1, t_A, t_B, t_C, t_2, t_upper, N_AB, N_ABC, r, loglik, 0], '../results/sim_{}_{}_{}_{}.csv'.format(n_int_AB, n_int_ABC, seed, model))
-  File "/faststorage/project/Primategenomes/people/iker/trails_testing/trails/src/trails/optimizer.py", line 255, in write_list
-    with open(f'{res_name}', 'a') as f:
-FileNotFoundError: [Errno 2] No such file or directory: '../results/sim_1_5_3_Nelder-Mead.csv'
+2023-11-28 10:10:06,226	INFO worker.py:1553 -- Started a local Ray instance.
+slurmstepd: error: *** JOB 26780798 ON s05n16 CANCELLED AT 2023-12-03T10:10:08 DUE TO TIME LIMIT ***
