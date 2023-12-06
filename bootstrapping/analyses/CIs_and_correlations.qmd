@@ -1,0 +1,181 @@
+---
+title: "CIs and correlation"
+format: html
+editor: visual
+---
+
+```{r setup}
+
+library(tidyverse)
+library(glue)
+library(corrr)
+library(ggthemes)
+
+```
+
+```{r}
+
+cut_ABC <- qexp((0:5)/5)
+
+nsim <- 20
+
+mu_est = 1.25e-08
+g = 25
+
+tab2 <- tibble()
+
+for (sim in 1:nsim) {
+  if (file.exists(glue('../results/sim_1_5_{sim}_Nelder-Mead.csv'))) {
+    tab2 <- bind_rows(tab2, read_csv(
+      glue('../results/sim_1_5_{sim}_Nelder-Mead.csv'), 
+      col_names = c('idx', 't_A', 't_B', 't_C', 't_2', 't_upper', 'N_AB', 'N_ABC', 'rho', 
+                    'loglik', 'time'),
+      show_col_types = FALSE) %>% 
+      mutate(sim = sim) 
+    )
+  }
+}
+
+true_tab <- tab2 |> 
+  filter(sim == 19 & idx == 0) |> 
+  select(sim, t_A, t_B, t_C, t_2, t_upper, N_AB, N_ABC, rho) |> 
+  mutate(
+    t_x = cut_ABC[5]*N_ABC,
+    t_out = (((t_A+t_B)/2+t_2)+t_C)/2 + t_x*N_ABC + t_upper + 2*N_ABC
+  ) |> 
+  transmute(
+    H_to_HC = t_A,
+    C_to_HC = t_B,
+    G_to_HCG = t_C,
+    O_to_HCGO = t_out-2*N_ABC,
+    HC_to_HCG = t_2,
+    HCG_to_HCGO = t_x*N_ABC+t_upper,
+    N_AB, 
+    N_ABC, 
+    rho
+  ) |> 
+  pivot_longer(everything()) |> 
+  mutate(
+    value = ifelse(str_detect(name, 'to'), value/mu_est*g/1000000, value),
+    value = ifelse(str_detect(name, '^N_'), value/mu_est/2, value),
+    value = ifelse(name == 'rho', value*mu_est, value)
+  )
+
+dat <- tab2 |> 
+  group_by(sim) |> 
+  filter(loglik == max(loglik)) |> 
+  select(t_A, t_B, t_C, t_2, t_upper, N_AB, N_ABC, rho) |> 
+  mutate(
+    t_x = cut_ABC[5]*N_ABC,
+    t_out = (((t_A+t_B)/2+t_2)+t_C)/2 + t_x*N_ABC + t_upper + 2*N_ABC
+  ) |> 
+  transmute(
+    sim,
+    H_to_HC = t_A,
+    C_to_HC = t_B,
+    G_to_HCG = t_C,
+    O_to_HCGO = t_out-2*N_ABC,
+    HC_to_HCG = t_2,
+    HCG_to_HCGO = t_x*N_ABC+t_upper,
+    N_AB, 
+    N_ABC, 
+    rho
+  ) |> 
+  pivot_longer(-sim) |> 
+  mutate(
+    value = ifelse(str_detect(name, 'to'), value/mu_est*g/1000000, value),
+    value = ifelse(str_detect(name, '^N_'), value/mu_est/2, value),
+    value = ifelse(name == 'rho', value*mu_est, value)
+  ) 
+
+norm_df <- dat %>% 
+  group_by(name) |> 
+  summarise(
+    mean_norm = mean(value),
+    sd_norm = sd(value),
+    min = min(value),
+    max = max(value)
+  ) |> 
+  group_by(name) |> 
+  summarise(
+    x = seq(min, max, length.out = 100),
+    y = dnorm(x, mean_norm, sd_norm)
+  )
+
+dat |> 
+  ggplot() +
+  # geom_histogram(aes(value, y = after_stat(density)), bins = 10) +
+  geom_density(aes(value)) +
+  geom_line(aes(x, y), data = norm_df, color = 'blue') +
+  geom_vline(aes(xintercept = value), data = true_tab, color = 'red', linetype = 2) +
+  facet_wrap(~name, scales = 'free') +
+  theme_few() +
+  labs(x = 'Value', y = 'Density')
+
+ggsave('fitted_normals.pdf', height = 5, width = 7)
+
+
+latex_table <- dat %>% 
+  group_by(name) |> 
+  summarise(
+    mean_norm = mean(value),
+    sd_norm = sd(value),
+    low_IC = qnorm(0.025, mean_norm, sd_norm),
+    high_IC = qnorm(0.925, mean_norm, sd_norm)
+  ) |> 
+  full_join(true_tab, by = 'name') |> 
+  transmute(
+    Parameter = name,
+    `Estimated value` = value,
+    `Bootstrapped mean` = mean_norm,
+    `Bootstrapped SD` = sd_norm,
+    `Low CI` = low_IC,
+    `High CI` = high_IC
+  )
+
+latex_table
+
+# xtable::xtable(latex_table, type = "latex")
+
+```
+
+```{r fig.height=8, fig.width=8}
+
+library(GGally)
+library(mclust)
+
+my_fn <- function(data, mapping, ...){
+  dat <- data |>
+    select(quo_name(mapping$x), quo_name(mapping$y))
+  ngrid <- 101
+  x1 <- seq(min(dat[,1]), max(dat[,1]), length = ngrid)
+  x2 <- seq(min(dat[,2]), max(dat[,2]), length = ngrid)
+  fitted_model_params <- mvn('XXX', dat)$parameters
+  dens <- dmvnorm(as.matrix(expand.grid(x1, x2)), 
+                  fitted_model_params$mean, 
+                  fitted_model_params$variance$Sigma)
+  dens_tab <- expand.grid(x1, x2) |> as.tibble()
+  dens_tab$Var3 <- dens
+  p <- ggplot(data = data, mapping = mapping) + 
+    geom_contour(aes(Var1, Var2, z = Var3), 
+                 bins = 5,
+                 data = dens_tab) +
+    geom_point() 
+    # geom_smooth(method=lm, fill="blue", color="blue", formula = 'y ~ x', ...) +
+  p
+}
+
+tab2 |> 
+  group_by(sim) |> 
+  filter(loglik == max(loglik)) |> 
+  ungroup() |> 
+  select(t_A, t_B, t_C, t_2, t_upper, N_AB, N_ABC, rho) %>% 
+  ggpairs(progress = FALSE, lower = list(continuous = my_fn)) +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
+
+
+
+
+```
