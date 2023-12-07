@@ -110,9 +110,12 @@ dat |>
   geom_vline(aes(xintercept = value), data = true_tab, color = 'red', linetype = 2) +
   facet_wrap(~name, scales = 'free') +
   theme_few() +
-  labs(x = 'Value', y = 'Density')
+  labs(x = 'Value', y = 'Density') +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1)
+    )
 
-ggsave('fitted_normals.pdf', height = 5, width = 7)
+ggsave('fitted_normals.pdf', height = 7, width = 9)
 
 
 latex_table <- dat %>% 
@@ -175,7 +178,7 @@ tab2 |>
       axis.text.x = element_text(angle = 45, hjust = 1)
     )
 
-
+ggsave('correlations.pdf', height = 8, width = 8)
 
 
 ```
