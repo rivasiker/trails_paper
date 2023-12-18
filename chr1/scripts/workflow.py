@@ -56,7 +56,8 @@ t_A = t_1
 t_B = t_1
 t_C = t_1+t_2
 
-for method in ['L-BFGS-B', 'Nelder-Mead']:
+# for method in ['L-BFGS-B', 'Nelder-Mead']:
+for method in ['L-BFGS-B']:
     continue
     # print(f"../results/chr21_{method}.csv")
     gwf.target(f"chr1_{method.replace('-', '')}_newparam",
@@ -72,7 +73,8 @@ for method in ['L-BFGS-B', 'Nelder-Mead']:
 n_int_AB = 1
 n_int_ABC = 5
 
-for method in ['L-BFGS-B', 'Nelder-Mead']:
+# for method in ['L-BFGS-B', 'Nelder-Mead']:
+for method in ['Nelder-Mead']:
     continue
     # print(f"../results/chr21_{method}.csv")
     gwf.target(f"chr1_{method.replace('-', '')}_newparam_second_run",
