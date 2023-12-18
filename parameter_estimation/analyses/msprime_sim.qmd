@@ -320,7 +320,7 @@ tab_plt_2 |>
   geom_segment(aes(x = mean_val, xend = mean_val, y = nam-0.5, yend = nam+0.5, 
                    color = as.character(n_AB)), size = 1, data = meanvals) +
   geom_segment(aes(x = qua1, xend = qua2, y = nam, yend = nam, 
-                   color = as.character(n_AB)), size = 1, data = meanvals) +
+                   color = as.character(n_AB)), size = 0.5, data = meanvals) +
   # geom_jitter(aes(value, nam, color = as.character(n_AB))) +
   geom_point(aes(value, nam+(1/(nsim+1))*sim-0.5, color = as.character(n_AB)), shape = 21) +
    geom_vline(aes(xintercept = 0), linetype = 2) +
