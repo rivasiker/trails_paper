@@ -34,6 +34,7 @@ for n_int_AB in [1]:
         for seed in range(1, 6):
             # if exists(f'../results/sim_{n_int_AB}_{n_int_ABC}_{seed}_{model}.csv'):
             #     pass
+            # print(f"python optimize_introgression.py {seed} {t_A} {t_B} {t_C} {t_2} {t_3} {N_AB} {N_ABC} {r} {mu} {n_int_AB} {n_int_ABC} {model} {t_m} {m}")
             tot_lst.append('simulate_{}_{}_{}_{}'.format(n_int_AB, n_int_ABC, seed, model))
             gwf.target('simulate_{}_{}_{}_{}'.format(n_int_AB, n_int_ABC, seed, model),
                 inputs=['optimize_introgression.py'],

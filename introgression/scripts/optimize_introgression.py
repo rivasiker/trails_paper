@@ -157,7 +157,6 @@ loglik = loglik_wrapper(transitions, emissions, starting, [E])
 write_list([-1, t_A, t_B, t_C, t_2, t_upper, t_m, N_AB, N_ABC, r, m, loglik, 0], '../results/sim_{}_{}_{}_{}.csv'.format(n_int_AB, n_int_ABC, seed, model))
 
 np.random.seed(seed)
-
 t_init_A = np.random.normal(t_A, t_A/5)
 t_init_B = np.random.normal(t_B, t_B/5)
 t_init_C = np.random.normal(t_C, t_C/5)
@@ -168,6 +167,21 @@ N_init_AB = np.random.normal(N_AB, N_AB/5)
 N_init_ABC = np.random.normal(N_ABC, N_ABC/5)
 r_init = np.random.normal(r, r/5)
 m_init = m
+
+acc = 1
+while ((t_init_B-t_init_m) < 0) or ((t_init_C-t_init_2-t_init_m) < 0):
+    np.random.seed(seed+acc)
+    t_init_A = np.random.normal(t_A, t_A/5)
+    t_init_B = np.random.normal(t_B, t_B/5)
+    t_init_C = np.random.normal(t_C, t_C/5)
+    t_init_2 = np.random.normal(t_2, t_2/5)
+    t_init_upper = np.random.normal(t_upper, t_upper/5)
+    t_init_m = np.random.normal(t_m, t_m/5)
+    N_init_AB = np.random.normal(N_AB, N_AB/5)
+    N_init_ABC = np.random.normal(N_ABC, N_ABC/5)
+    r_init = np.random.normal(r, r/5)
+    m_init = m
+    acc += 1
 
 dct = {
     't_A':     [t_init_A,     t_init_A/10, t_init_A*10], 
@@ -188,6 +202,5 @@ res = optimizer_introgression(
     fixed_params = dct2, 
     V_lst = [E], 
     res_name = f'../results/sim_{n_int_AB}_{n_int_ABC}_{seed}_{model}.csv', 
-    header = False,
-    method = "Nelder-Mead"
+    header = False
     )
