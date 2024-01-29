@@ -1,0 +1,2 @@
+2024-01-19 21:24:11,060	INFO worker.py:1553 -- Started a local Ray instance.
+slurmstepd: error: *** JOB 29918520 ON cn-1018 CANCELLED AT 2024-01-22T06:24:20 DUE TO TIME LIMIT ***
