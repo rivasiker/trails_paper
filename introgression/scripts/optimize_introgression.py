@@ -7,7 +7,7 @@ import pandas as pd
 import time
 import re
 import msprime
-
+import sys
 
 ####################### Model parameters #######################
 
@@ -147,6 +147,8 @@ N_AB = N_AB*mu
 N_ABC = N_ABC*mu
 r = r/mu
 
+print(f't_m = {t_m}')
+
 transitions, emissions, starting, hidden_states, observed_states = trans_emiss_calc_introgression(
     t_A, t_B, t_C, t_2, t_upper, t_out, t_m,
     N_AB, N_ABC,
@@ -169,8 +171,9 @@ r_init = np.random.normal(r, r/5)
 m_init = m
 
 acc = 1
-while ((t_init_B-t_init_m) < 0) or ((t_init_C-t_init_2-t_init_m) < 0):
-    np.random.seed(seed+acc)
+while (t_init_B/2 <= t_init_m) or ((t_init_C/2-t_init_2/2) <= t_init_m):
+    print(acc)
+    np.random.seed(seed*10000+acc)
     t_init_A = np.random.normal(t_A, t_A/5)
     t_init_B = np.random.normal(t_B, t_B/5)
     t_init_C = np.random.normal(t_C, t_C/5)
@@ -184,17 +187,19 @@ while ((t_init_B-t_init_m) < 0) or ((t_init_C-t_init_2-t_init_m) < 0):
     acc += 1
 
 dct = {
-    't_A':     [t_init_A,     t_init_A/10, t_init_A*10], 
-    't_B':     [t_init_B,     t_init_B/10, t_init_B*10], 
-    't_C':     [t_init_C,     t_init_C/10, t_init_C*10], 
-    't_2':     [t_init_2,     t_init_2/10, t_init_2*10], 
-    't_upper': [t_init_upper, t_init_upper/10, t_init_upper*10], 
-    't_m':     [t_init_m,     0, t_B/2], 
-    'N_AB':    [N_init_AB,    N_init_AB/10,  N_init_AB*10], 
-    'N_ABC':   [N_init_ABC,   N_init_ABC/10,  N_init_ABC*10], 
-    'r':       [r_init,       r_init/10,  r_init*10],
+    't_A':     [t_init_A,     t_init_A/2, t_init_A*2], 
+    't_B':     [t_init_B,     t_init_B/2, t_init_B*2], 
+    't_C':     [t_init_C,     t_init_C/2, t_init_C*2], 
+    't_2':     [t_init_2,     t_init_2/2, t_init_2*2], 
+    't_upper': [t_init_upper, t_init_upper/2, t_init_upper*2], 
+    't_m':     [t_init_m,     0, min([t_init_B/2, t_init_2/2+t_init_C/2])], 
+    'N_AB':    [N_init_AB,    N_init_AB/2,  N_init_AB*2], 
+    'N_ABC':   [N_init_ABC,   N_init_ABC/2,  N_init_ABC*2], 
+    'r':       [r_init,       r_init/2,  r_init*2],
     'm':       [m_init,       0.0001,  0.9999]
     }
+
+print(dct)
 
 dct2 = {'n_int_AB':n_int_AB, 'n_int_ABC':n_int_ABC}
 res = optimizer_introgression(
@@ -202,5 +207,6 @@ res = optimizer_introgression(
     fixed_params = dct2, 
     V_lst = [E], 
     res_name = f'../results/sim_{n_int_AB}_{n_int_ABC}_{seed}_{model}.csv', 
-    header = False
+    header = False,
+    method = "Nelder-Mead"
     )

@@ -1,0 +1,8 @@
+/faststorage/project/Primategenomes/people/iker/trails_testing/trails/src/trails/get_joint_prob_mat_introgression.py:312: RuntimeWarning: invalid value encountered in true_divide
+  final_AB_miss[5::], final_BC_miss[0:5]/sum(final_BC_miss[0:5]))
+/faststorage/project/Primategenomes/people/iker/trails_testing/trails/src/trails/get_joint_prob_mat_introgression.py:318: RuntimeWarning: invalid value encountered in true_divide
+  final_AB_miss[5::]/sum(final_AB_miss[5::]), final_BC_miss[0:5])
+/faststorage/project/Primategenomes/people/iker/trails_testing/trails/src/trails/get_joint_prob_mat_introgression.py:324: RuntimeWarning: invalid value encountered in true_divide
+  final_AB_miss[0:5], final_BC_miss[5::]/sum(final_BC_miss[5::]))
+/faststorage/project/Primategenomes/people/iker/trails_testing/trails/src/trails/get_joint_prob_mat_introgression.py:330: RuntimeWarning: invalid value encountered in true_divide
+  final_AB_miss[0:5]/sum(final_AB_miss[0:5]), final_BC_miss[5::])

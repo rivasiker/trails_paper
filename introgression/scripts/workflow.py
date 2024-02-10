@@ -39,7 +39,7 @@ for n_int_AB in [1]:
             gwf.target('simulate_{}_{}_{}_{}'.format(n_int_AB, n_int_ABC, seed, model),
                 inputs=['optimize_introgression.py'],
                 outputs=['../results/{}_{}_{}_{}_{}.csv'.format(x, n_int_AB, n_int_ABC, seed, model) for x in ['sim']],
-                cores=n_int_ABC,
+                cores=1 if n_int_ABC == 1 else 8,
                 memory='{}g'.format(n_int_ABC*4),
                 walltime= '{}:00:00'.format(dct[n_int_ABC]),
                 account='Primategenomes') << f"""
