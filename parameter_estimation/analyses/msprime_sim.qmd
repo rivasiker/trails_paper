@@ -329,7 +329,7 @@ tab_plt_2 |>
                      labels=TeX(paste0('$', fornames$name_1, '_{', fornames$name_2, '}$')), 
                      expand = c(0, 0)) +
   scale_color_manual(values = c('#de77ae', '#7fbc41')) +
-  xlab('(estimated - true) / estimated') +
+  xlab('(estimated - true) / true') +
   ylab('Parameter') +
   labs(color = TeX('Number of intervals ($n_{AB} = n_{ABC}$)')) +
   theme(legend.position = 'top')
@@ -344,9 +344,6 @@ mult <- 1.2
 ggsave('../plots/new_figure_2.pdf', height = 5/mult, width = 7/mult)
 
 ```
-
-
-
 
 ```{r}
 
@@ -374,4 +371,3 @@ tab_plt_2 |>
   scale_color_manual(values = c('#de77ae', '#7fbc41'), breaks = c(5, 1))
 
 ```
-
