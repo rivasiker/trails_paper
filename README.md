@@ -1,3 +1,5 @@
+# Code for reproducing the analyses in [Rivas-González et al. 2024](https://doi.org/10.1371/journal.pgen.1010836)
+
 TRAILS is a coalescent hidden Markov model (HMM) that reconstructs demographic parameters (ancestral Ne and split times) for three species and an outgroup. After model fitting, TRAILS can also perform posterior decoding to identify incomplete lineage sorting fragments. 
 
 In this repository, you can find the code for reproducing the analyses in the original TRAILS publication ([Rivas-González et al. 2024](https://doi.org/10.1371/journal.pgen.1010836)):
