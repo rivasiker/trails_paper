@@ -51,10 +51,37 @@ for n_int_AB in [1, 5]:
                 inputs=['optimize_4.py'],
                 outputs=['../results/{}_{}_{}_{}_error_model.csv'.format(x, n_int_AB, n_int_ABC, seed) for x in ['trees', 'sim']],
                 cores=n_int_ABC,
-                memory='{}g'.format(n_int_ABC*4),
-                walltime= '{}:00:00'.format(dct[n_int_ABC]),
+                memory='{}g'.format(40),
+                walltime= '07-00:00:00',
                 account='Primategenomes') << f"""
             python optimize_4.py {seed} {t_A} {t_B} {t_C} {t_2} {t_3} {N_AB} {N_ABC} {r} {mu} {n_int_AB} {n_int_ABC} error_model
+            """
+
+fct = 50
+t_A = t_A/fct
+t_B = t_B/fct
+t_C = t_C/fct
+t_2 = t_2/fct
+t_3 = t_3/fct
+N_AB = N_AB/fct
+N_ABC = N_ABC/fct
+
+
+for n_int_AB in [1, 5]:
+    for n_int_ABC in [1]:
+        n_int_ABC = n_int_AB
+        for seed in range(1, 21):
+            if exists(f'../results/sim_{n_int_AB}_{n_int_ABC}_{seed}_error_model_reduced.csv'):
+                continue
+            tot_lst.append('simulate_{}_{}_{}_error_model_reduced'.format(n_int_AB, n_int_ABC, seed))
+            gwf.target('simulate_{}_{}_{}_error_model_reduced'.format(n_int_AB, n_int_ABC, seed),
+                inputs=['optimize_4.py'],
+                outputs=['../results/{}_{}_{}_{}_error_model_reduced.csv'.format(x, n_int_AB, n_int_ABC, seed) for x in ['trees', 'sim']],
+                cores=n_int_ABC,
+                memory='{}g'.format(40),
+                walltime= '07-00:00:00',
+                account='Primategenomes') << f"""
+            python optimize_4.py {seed} {t_A} {t_B} {t_C} {t_2} {t_3} {N_AB} {N_ABC} {r} {mu} {n_int_AB} {n_int_ABC} error_model_reduced
             """
 
 #[print(i, end = ' ') for i in tot_lst]
