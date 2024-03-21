@@ -65,3 +65,4 @@ simulated_posterior/results/tmp/post_26.csv
 simulated_posterior/results/tmp/post_27.csv
 simulated_posterior/results/tmp/post_28.csv
 simulated_posterior/results/tmp/post_29.csv
+parameter_estimation/scripts/*pkl
