@@ -1,2 +1,1 @@
-2023-11-04 11:26:36,407	INFO worker.py:1553 -- Started a local Ray instance.
-slurmstepd: error: *** JOB 25749391 ON s22n21 CANCELLED AT 2023-11-09T12:26:40 DUE TO TIME LIMIT ***
+2024-03-22 01:27:32,073	INFO worker.py:1715 -- Started a local Ray instance. View the dashboard at [1m[32mhttp://127.0.0.1:8265 [39m[22m
